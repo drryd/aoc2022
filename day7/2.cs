@@ -50,12 +50,26 @@ foreach ( var line in lines )
     var tokens = line.Split( " " );
     if ( tokens[0] == "dir" )
     {
-        currentDirectory.CreateSubdirectory( tokens[1] );
+        if ( !currentDirectory.DoesSubdirectoryExist( tokens[1] ) )
+        {
+            currentDirectory.CreateSubdirectory( tokens[1] );
+        }
+        else
+        {
+            throw new Exception("Subdirectory already exists");
+        }
     }
 
     if ( long.TryParse( tokens[0], out long fileSize ) )
     {
-        currentDirectory.CreateFile( tokens[1], fileSize );
+        if ( !currentDirectory.DoesFileExist( tokens[1] ) )
+        {
+            currentDirectory.CreateFile( tokens[1], fileSize );
+        }
+        else
+        {
+            throw new Exception("File already exists");
+        }
     }
 }
 
@@ -101,6 +115,10 @@ class Directory
         }
     }
     public bool IsRoot { get { return Name == "/"; } }
+
+    public bool DoesFileExist(string name) { return this.Files.Exists(f => f.Name == name); }
+
+    public bool DoesSubdirectoryExist(string name) { return this.Subdirectories.Keys.Contains(name); }
 
     public Directory(string name, Directory parent = null)
     {
